@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POS DZ - الإعدادات العامة</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    .setting-row { display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--border); }
+    .setting-row:last-child { border-bottom:none; }
+    .setting-label { font-size:0.95rem;font-weight:600; }
+    .setting-desc { font-size:0.78rem;color:var(--text-secondary);margin-top:2px; }
+    .theme-colors { display:flex;gap:10px;flex-wrap:wrap; }
+    .theme-dot { width:38px;height:38px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:var(--transition);box-shadow:0 2px 8px rgba(0,0,0,0.3); }
+    .theme-dot.active,.theme-dot:hover { border-color:#fff;transform:scale(1.18); }
+    .preview-box {
+      background:#111;border:1px solid var(--border);border-radius:var(--radius);
+      padding:14px 18px;font-size:12px;font-family:'Courier New',monospace;
+      white-space:pre;min-height:300px;color:#ddd;line-height:1.55;overflow-x:auto;
+    }
+    .logo-preview { width:80px;height:80px;border-radius:var(--radius-sm);object-fit:cover;border:2px solid var(--border); }
+    .danger-zone { border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius);padding:20px;margin-top:16px; }
+    .danger-zone h4 { color:var(--danger);margin-bottom:12px; }
+    .printer-card {
+      border:2px solid var(--border);border-radius:var(--radius);
+      padding:14px;margin-bottom:12px;cursor:pointer;
+      transition:var(--transition);background:var(--bg-medium);
+    }
+    .printer-card:hover { border-color:var(--primary); }
+    .printer-card.selected { border-color:var(--primary);background:rgba(124,58,237,0.08); }
+    .printer-card-title { font-weight:700;font-size:0.95rem;margin-bottom:4px; }
+    .printer-card-desc { font-size:0.78rem;color:var(--text-secondary); }
+    .barcode-preview-box {
+      background:#fff;border:2px dashed var(--border);border-radius:var(--radius);
+      padding:16px;text-align:center;min-height:140px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+    }
+    .barcode-bars { display:flex;align-items:flex-end;gap:0;justify-content:center;margin:6px 0; }
+    .barcode-bar { display:inline-block; }
+    .section-divider { height:1px;background:var(--border);margin:18px 0; }
+    .bg-mode-btn {
+      padding:10px 22px;border-radius:8px;cursor:pointer;
+      border:2px solid var(--border);font-size:0.88rem;
+      font-weight:700;transition:var(--transition);
+      font-family:'Cairo',sans-serif;
+    }
+    .bg-mode-btn.sel-dark { border-color:var(--primary)!important;box-shadow:0 0 12px var(--glow); }
+    .bg-mode-btn.sel-light { border-color:#777!important; }
+  </style>
+</head>
+<body>
+<div class="bg-animated"></div>
+<div class="page-wrapper">
+  <header class="app-header">
+    <button class="menu-btn" id="menuBtn" title="القائمة">☰</button>
+    <span class="store-name" id="headerStoreName">اسم المتجر</span>
+    <div class="app-brand">
+      <span class="brand-title">POS DZ</span>
+      <span class="brand-clock" id="clockDisplay"></span>
+    </div>
+  </header>
+  <div class="main-content">
+    <div class="section-header">
+      <a href="sale.html" class="back-btn" id="backBtn">← رجوع</a>
+      <h2 class="page-title" id="pageTitle">⚙️ الإعدادات العامة</h2>
+    </div>
+
+    <div class="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab('program')" id="tabBtnProgram">💻 البرنامج</button>
+      <button class="tab-btn" onclick="switchTab('store')"   id="tabBtnStore">🏪 المتجر</button>
+      <button class="tab-btn" onclick="switchTab('print')"   id="tabBtnPrint">🖨️ الطباعة</button>
+      <button class="tab-btn" onclick="switchTab('sync')"    id="tabBtnSync">☁️ المزامنة</button>
+      <button class="tab-btn" onclick="switchTab('scale')"   id="tabBtnScale">⚖️ الميزان</button>
+      <button class="tab-btn" onclick="switchTab('system')"  id="tabBtnSystem">🔧 النظام</button>
+      <button class="tab-btn" onclick="switchTab('about')"   id="tabBtnAbout">ℹ️ حول</button>
+    </div>
+
+    <!-- ═══ TAB: البرنامج ═══ -->
+    <div class="tab-content active" id="tab-program">
+      <div class="card">
+        <div class="setting-row">
+          <div><div class="setting-label" data-i18n="labelDate">📅 صيغة التاريخ</div></div>
+          <select class="select-field" id="dateFormat" style="width:200px;">
+            <option value="DD/MM/YYYY">يوم / شهر / سنة</option>
+            <option value="MM/DD/YYYY">شهر / يوم / سنة</option>
+            <option value="YYYY/MM/DD">سنة / شهر / يوم</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-label" data-i18n="labelCurrency">💰 رمز العملة</div></div>
+          <select class="select-field" id="currency" style="width:240px;">
+            <option value="دج">🇩🇿 دينار جزائري — دج</option>
+            <option value="DA">🇩🇿 دينار جزائري — DA</option>
+            <option value="EGP">🇪🇬 جنيه مصري — EGP</option>
+            <option value="SAR">🇸🇦 ريال سعودي — SAR</option>
+            <option value="AED">🇦🇪 درهم إماراتي — AED</option>
+            <option value="MAD">🇲🇦 درهم مغربي — MAD</option>
+            <option value="TND">🇹🇳 دينار تونسي — TND</option>
+            <option value="LYD">🇱🇾 دينار ليبي — LYD</option>
+            <option value="KWD">🇰🇼 دينار كويتي — KWD</option>
+            <option value="QAR">🇶🇦 ريال قطري — QAR</option>
+            <option value="USD">🇺🇸 دولار — USD</option>
+            <option value="EUR">🇪🇺 يورو — EUR</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <div class="setting-label" data-i18n="labelLang">🌐 لغة البرنامج</div>
+            <div class="setting-desc" data-i18n="labelLangDesc">تطبيق فوري على كل صفحات التطبيق</div>
+          </div>
+          <select class="select-field" id="language" style="width:200px;" onchange="onLangChange(this.value)">
+            <option value="ar">🇩🇿 العربية</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="en">🇬🇧 English</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-label" data-i18n="labelFont">🔤 خط التطبيق</div></div>
+          <select class="select-field" id="appFont" style="width:230px;" onchange="applyFontPreview(this.value)">
+            <option value="Cairo">Cairo — عربي أساسي</option>
+            <option value="Tajawal">Tajawal — عربي حديث</option>
+            <option value="Amiri">Amiri — عربي كلاسيكي</option>
+            <option value="Almarai">Almarai — عربي مستدير</option>
+            <option value="IBM Plex Sans Arabic">IBM Plex Arabic</option>
+          </select>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-label" data-i18n="labelFontSize">🔡 حجم الخط</div></div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button class="btn btn-secondary btn-sm" onclick="changeFontSize(-1)" title="تصغير">−</button>
+            <span id="fontSizeDisplay" style="font-size:1rem;min-width:40px;text-align:center;font-weight:700;">15</span>
+            <button class="btn btn-secondary btn-sm" onclick="changeFontSize(1)" title="تكبير">+</button>
+          </div>
+        </div>
+
+        <!-- Accent Colors -->
+        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:14px;">
+          <div class="setting-label" data-i18n="labelAccentColor">🎨 لون الأيقونات والأزرار</div>
+          <div class="theme-colors">
+            <div class="theme-dot" data-theme="blue_purple"
+              style="background:linear-gradient(135deg,#7C3AED,#2563EB);"
+              title="بنفسجي أزرق" onclick="selectAccent('blue_purple')"></div>
+            <div class="theme-dot" data-theme="green"
+              style="background:linear-gradient(135deg,#059669,#0891B2);"
+              title="أخضر" onclick="selectAccent('green')"></div>
+            <div class="theme-dot" data-theme="blue"
+              style="background:linear-gradient(135deg,#2563EB,#0891B2);"
+              title="أزرق" onclick="selectAccent('blue')"></div>
+            <div class="theme-dot" data-theme="orange"
+              style="background:linear-gradient(135deg,#EA580C,#D97706);"
+              title="برتقالي" onclick="selectAccent('orange')"></div>
+            <div class="theme-dot" data-theme="red"
+              style="background:linear-gradient(135deg,#DC2626,#9333EA);"
+              title="أحمر" onclick="selectAccent('red')"></div>
+          </div>
+
+          <!-- Background mode -->
+          <div class="setting-label" data-i18n="labelBgMode">🌙 وضع الخلفية</div>
+          <div style="display:flex;gap:12px;">
+            <button id="btnBgDark"
+              class="bg-mode-btn sel-dark"
+              style="background:#0F0A1E;color:#fff;"
+              onclick="selectBg('dark')" title="وضع ليلي">
+              🌙 <span data-i18n="bgDark">داكن — Mode nuit</span>
+            </button>
+            <button id="btnBgLight"
+              class="bg-mode-btn"
+              style="background:#F0F0F5;color:#111;"
+              onclick="selectBg('light')" title="وضع نهاري">
+              ☀️ <span data-i18n="bgLight">فاتح — Mode jour</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="setting-row">
+          <div><div class="setting-label" data-i18n="labelSoundAdd">🔊 صوت إضافة المنتج</div></div>
+          <label class="toggle-switch"><input type="checkbox" id="soundAdd"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label" data-i18n="labelSoundSell">🔊 صوت إتمام البيع</div></div>
+          <label class="toggle-switch"><input type="checkbox" id="soundSell"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label" data-i18n="labelSoundBtn">🔊 صوت الأزرار</div></div>
+          <label class="toggle-switch"><input type="checkbox" id="soundButtons"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+
+        <div class="section-divider"></div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label" data-i18n="labelBarcode">📷 تفعيل قارئ الباركود</div>
+            <div class="setting-desc" data-i18n="labelBarcodeDesc">جهاز الباركود يضيف المنتجات تلقائياً عند التفعيل</div>
+          </div>
+          <label class="toggle-switch"><input type="checkbox" id="barcodeReader"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label" data-i18n="labelBarcodeAuto">📷 حجز المنتجات تلقائياً</div></div>
+          <label class="toggle-switch"><input type="checkbox" id="barcodeAuto"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label" data-i18n="labelTouchKb">⌨️ الكيبورد الافتراضي (شاشات اللمس)</div>
+            <div class="setting-desc" data-i18n="labelTouchKbDesc">زر على جانب الشاشة قابل للسحب</div>
+          </div>
+          <label class="toggle-switch"><input type="checkbox" id="touchKeyboard"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+
+        <button class="btn btn-success mt-3" onclick="saveSettings('program')" data-i18n="saveBtn">💾 حفظ البيانات</button>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: المتجر ═══ -->
+    <div class="tab-content" id="tab-store">
+      <div class="card">
+        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:12px;">
+          <div class="setting-label">🖼️ شعار المتجر</div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <img id="logoPreview" class="logo-preview" style="display:none;" src=""/>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <label class="btn btn-secondary btn-sm" style="cursor:pointer;">
+                📂 تحميل الشعار <input type="file" accept="image/*" style="display:none;" onchange="loadLogo(this)"/>
+              </label>
+              <button class="btn btn-danger btn-sm" onclick="deleteLogo()">🗑️ حذف</button>
+            </div>
+          </div>
+        </div>
+        <div class="input-group">
+          <label class="input-label">🏪 اسم المتجر</label>
+          <input class="input-field" type="text" id="storeName" placeholder="اسم متجرك" oninput="updateInvoicePreview()"/>
+        </div>
+        <div class="input-group">
+          <label class="input-label">📞 رقم الهاتف</label>
+          <input class="input-field" type="tel" id="storePhone" placeholder="0700000000" oninput="updateInvoicePreview()"/>
+        </div>
+        <div class="input-group">
+          <label class="input-label">📍 العنوان</label>
+          <input class="input-field" type="text" id="storeAddress" placeholder="عنوان المتجر" oninput="updateInvoicePreview()"/>
+        </div>
+        <div class="input-group">
+          <label class="input-label">💬 رسالة الترحيب</label>
+          <input class="input-field" type="text" id="storeWelcome" placeholder="شكراً لزيارتكم" oninput="updateInvoicePreview()"/>
+        </div>
+        <button class="btn btn-success mt-3" onclick="saveSettings('store')" data-i18n="saveBtn">💾 حفظ البيانات</button>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: الطباعة ═══ -->
+    <div class="tab-content" id="tab-print">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;">
+
+        <!-- Col 1 -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- فاتورة الزبون -->
+          <div class="card">
+            <h4 style="color:var(--primary-light);margin-bottom:14px;">🧾 فاتورة الزبون</h4>
+
+            <div class="input-group">
+              <label class="input-label">🔢 رقم الفاتورة الحالي</label>
+              <input class="input-field" type="number" id="invoiceNumber" min="1"/>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">📄 مقاس الورق</label>
+              <select class="select-field" id="paperSize" onchange="updateInvoicePreview()">
+                <option value="58mm">58 مم — حرارية صغيرة</option>
+                <option value="80mm" selected>80 مم — حرارية عادية</option>
+                <option value="A5">A5</option>
+                <option value="A4">A4</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">🖨️ طابعة الفواتير</label>
+              <div class="printer-card selected" id="printerInvoiceCard">
+                <div class="printer-card-title">🖨️ <span id="printerInvoiceName">الطابعة الافتراضية</span></div>
+                <div class="printer-card-desc">اضغط على الزر لفتح إعدادات الطابعة</div>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-secondary btn-sm" onclick="openPrinterDialog('invoice')" title="فتح إعدادات الطابعة في الحاسوب">🖥️ اختيار الطابعة</button>
+                <button class="btn btn-primary btn-sm" onclick="testPrintInvoice()" title="طباعة تجريبية">🔍 تجريبي</button>
+              </div>
+            </div>
+
+            <div class="section-divider"></div>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:10px;">☑️ محتوى الفاتورة — التغيير يظهر مباشرة في المعاينة</p>
+            <div class="setting-row"><span class="setting-label" style="font-size:0.88rem;">🖼️ شعار المتجر</span>
+              <label class="toggle-switch"><input type="checkbox" id="printLogo" onchange="updateInvoicePreview()"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+            <div class="setting-row"><span class="setting-label" style="font-size:0.88rem;">🏪 اسم المتجر</span>
+              <label class="toggle-switch"><input type="checkbox" id="printName" onchange="updateInvoicePreview()"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+            <div class="setting-row"><span class="setting-label" style="font-size:0.88rem;">📞 رقم الهاتف</span>
+              <label class="toggle-switch"><input type="checkbox" id="printPhone" onchange="updateInvoicePreview()"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+            <div class="setting-row"><span class="setting-label" style="font-size:0.88rem;">📍 العنوان</span>
+              <label class="toggle-switch"><input type="checkbox" id="printAddress" onchange="updateInvoicePreview()"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+            <div class="setting-row"><span class="setting-label" style="font-size:0.88rem;">💬 رسالة الترحيب</span>
+              <label class="toggle-switch"><input type="checkbox" id="printWelcome" onchange="updateInvoicePreview()"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+            <div class="setting-row"><span class="setting-label" style="font-size:0.88rem;">📊 باركود الفاتورة</span>
+              <label class="toggle-switch"><input type="checkbox" id="printBarcode" onchange="updateInvoicePreview()"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+            <button class="btn btn-success mt-3" onclick="saveSettings('print')" data-i18n="saveBtn">💾 حفظ إعدادات الفاتورة</button>
+          </div>
+
+          <!-- ملصق الباركود -->
+          <div class="card">
+            <h4 style="color:var(--primary-light);margin-bottom:14px;">🏷️ ملصق الباركود</h4>
+
+            <div class="input-group">
+              <label class="input-label">🖨️ طابعة الباركود</label>
+              <div class="printer-card" id="printerBarcodeCard">
+                <div class="printer-card-title">🖨️ <span id="printerBarcodeName">الطابعة الافتراضية</span></div>
+                <div class="printer-card-desc">اضغط على الزر لفتح إعدادات الطابعة</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openPrinterDialog('barcode')" title="فتح إعدادات الطابعة">🖥️ اختيار الطابعة</button>
+            </div>
+
+            <div class="section-divider"></div>
+            <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:10px;">☑️ محتوى الملصق</p>
+            <div class="setting-row"><span class="setting-label" style="font-size:0.88rem;">🏪 اسم المتجر على الملصق</span>
+              <label class="toggle-switch"><input type="checkbox" id="barcodeShowStore" onchange="updateBarcodePreview()" checked/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+            <div class="setting-row"><span class="setting-label" style="font-size:0.88rem;">🏷️ اسم المنتج</span>
+              <label class="toggle-switch"><input type="checkbox" id="barcodeShowName" onchange="updateBarcodePreview()" checked/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+            <div class="setting-row"><span class="setting-label" style="font-size:0.88rem;">💰 السعر</span>
+              <label class="toggle-switch"><input type="checkbox" id="barcodeShowPrice" onchange="updateBarcodePreview()" checked/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+            </div>
+
+            <div class="input-group mt-3">
+              <label class="input-label">📐 نوع الباركود</label>
+              <select class="select-field" id="barcodeType" onchange="updateBarcodePreview()">
+                <option value="CODE128">CODE 128 (موصى به)</option>
+                <option value="EAN13">EAN-13</option>
+                <option value="EAN8">EAN-8</option>
+                <option value="UPCA">UPC-A</option>
+                <option value="QR">QR Code</option>
+              </select>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">🔤 خط الملصق</label>
+              <select class="select-field" id="barcodeFont" onchange="updateBarcodePreview()">
+                <option value="Cairo">Cairo (عربي)</option>
+                <option value="Arial">Arial</option>
+                <option value="Courier New">Courier New (احترافي)</option>
+                <option value="Tahoma">Tahoma</option>
+              </select>
+            </div>
+
+            <button class="btn btn-success mt-3" onclick="saveSettings('barcode')">💾 حفظ إعدادات الباركود</button>
+          </div>
+        </div>
+
+        <!-- Col 2: Previews -->
+        <div style="display:flex;flex-direction:column;gap:16px;position:sticky;top:70px;">
+          <!-- Invoice preview -->
+          <div class="card">
+            <h4 style="color:var(--primary-light);margin-bottom:12px;">👁️ معاينة الفاتورة</h4>
+            <div class="preview-box" id="invoicePreview">جاري التحميل...</div>
+          </div>
+          <!-- Barcode label preview -->
+          <div class="card">
+            <h4 style="color:var(--primary-light);margin-bottom:12px;">🏷️ معاينة ملصق الباركود</h4>
+            <div class="barcode-preview-box">
+              <div id="bpStoreName" style="font-size:11px;font-weight:700;color:#000;margin-bottom:2px;"></div>
+              <div id="bpProductName" style="font-size:13px;font-weight:900;color:#000;margin-bottom:4px;">سكر — 1كغ</div>
+              <div class="barcode-bars" id="bpBars"></div>
+              <div id="bpCode" style="font-family:'Courier New',monospace;font-size:10px;color:#000;margin:2px 0;">6191234567890</div>
+              <div id="bpPrice" style="font-size:15px;font-weight:900;color:#000;margin-top:3px;">150.00 دج</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: النظام ═══ -->
+    <div class="tab-content" id="tab-system">
+      <div class="card">
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">💾 النسخ الاحتياطي التلقائي اليومي</div>
+            <div class="setting-desc">يتم إنشاء نسخة احتياطية تلقائياً كل يوم</div>
+          </div>
+          <label class="toggle-switch"><input type="checkbox" id="autoBackup"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <button class="btn btn-primary mt-3" onclick="createBackup()" title="تحميل نسخة احتياطية">💾 إنشاء نسخة احتياطية الآن</button>
+      </div>
+      <div class="danger-zone">
+        <h4>🗑️ إدارة البيانات</h4>
+        <p class="text-muted text-sm mb-3">احذر! هذه العمليات لا يمكن التراجع عنها</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn btn-warning" onclick="partialClear()">⚠️ مسح جزئي</button>
+          <button class="btn btn-danger" onclick="fullClear()">🗑️ مسح كلي</button>
+        </div>
+        <div class="alert alert-warning mt-3">
+          <span>⚠️</span>
+          <div>
+            <b>المسح الجزئي:</b> يمسح المبيعات، الديون، السجل فقط — يُبقي المنتجات والزبائن.<br/>
+            <b>المسح الكلي:</b> يمسح كل شيء نهائياً.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: المزامنة ═══ -->
+    <div class="tab-content" id="tab-sync">
+      <div class="card">
+        <h4 style="color:var(--primary-light);margin-bottom:16px;">☁️ مزامنة البيانات — Multi-Device Sync</h4>
+        <div style="background:linear-gradient(135deg,var(--bg-dark),var(--bg-medium));border:1px solid var(--primary);border-radius:var(--radius);padding:18px;margin-bottom:18px;">
+          <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px;line-height:1.7;">
+            تتيح هذه الخاصية ربط عدة أجهزة بقاعدة بيانات واحدة مشتركة على السحابة.<br/>
+            البيانات تُحدَّث فورياً على كل الأجهزة عند حدوث أي بيع أو تغيير.
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+            <span style="background:rgba(124,58,237,0.15);border:1px solid var(--primary);border-radius:20px;padding:4px 12px;font-size:0.78rem;color:var(--primary-light);">🔄 Real-time Sync</span>
+            <span style="background:rgba(37,99,235,0.15);border:1px solid #2563EB;border-radius:20px;padding:4px 12px;font-size:0.78rem;color:#60A5FA;">📡 Multi-device</span>
+            <span style="background:rgba(5,150,105,0.15);border:1px solid var(--success);border-radius:20px;padding:4px 12px;font-size:0.78rem;color:var(--success);">📶 Offline-first</span>
+            <span style="background:rgba(234,88,12,0.15);border:1px solid var(--warning);border-radius:20px;padding:4px 12px;font-size:0.78rem;color:var(--warning);">🔌 API Integration</span>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-label">🔗 تفعيل المزامنة السحابية</div><div class="setting-desc">Real-time Synchronization عبر Firebase</div></div>
+          <label class="toggle-switch"><input type="checkbox" id="syncEnabled" onchange="toggleSync()"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+        <div id="syncConfig" style="display:none;">
+          <div class="setting-row" style="margin-top:12px;">
+            <div><div class="setting-label">🔑 مفتاح الخادم (Server Key)</div></div>
+          </div>
+          <input class="input-field" type="text" id="syncServerKey" placeholder="Firebase API Key أو Server URL" style="margin-bottom:10px;"/>
+          <div class="setting-row">
+            <div><div class="setting-label">🏢 معرّف المتجر</div><div class="setting-desc">يُستخدم لتمييز بياناتك عن متاجر أخرى</div></div>
+          </div>
+          <input class="input-field" type="text" id="syncStoreId" placeholder="مثال: store-123" style="margin-bottom:10px;"/>
+          <div class="setting-row">
+            <div><div class="setting-label">📶 المزامنة عند انقطاع الإنترنت</div><div class="setting-desc">Offline-first — تُخزَّن البيانات محلياً وتُرسَل عند الاتصال</div></div>
+            <label class="toggle-switch"><input type="checkbox" id="syncOfflineFirst" checked/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0;">
+            <div style="background:var(--bg-dark);border-radius:var(--radius-sm);padding:12px;text-align:center;">
+              <div style="font-size:1.3rem;">🖥️</div>
+              <div style="font-size:0.75rem;color:var(--text-secondary);margin:4px 0;">هذا الجهاز</div>
+              <div id="syncThisDevice" style="font-size:0.7rem;color:var(--success);">● متصل</div>
+            </div>
+            <div style="background:var(--bg-dark);border-radius:var(--radius-sm);padding:12px;text-align:center;opacity:0.5;">
+              <div style="font-size:1.3rem;">🖥️</div>
+              <div style="font-size:0.75rem;color:var(--text-secondary);margin:4px 0;">جهاز 2</div>
+              <div style="font-size:0.7rem;color:var(--text-secondary);">○ غير مربوط</div>
+            </div>
+            <div style="background:var(--bg-dark);border-radius:var(--radius-sm);padding:12px;text-align:center;opacity:0.5;">
+              <div style="font-size:1.3rem;">🖥️</div>
+              <div style="font-size:0.75rem;color:var(--text-secondary);margin:4px 0;">جهاز 3</div>
+              <div style="font-size:0.7rem;color:var(--text-secondary);">○ غير مربوط</div>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="testSync()" style="width:100%;">🔄 اختبار الاتصال</button>
+        </div>
+        <div style="margin-top:18px;padding:12px 16px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius-sm);">
+          <div style="font-size:0.78rem;color:var(--warning);font-weight:700;margin-bottom:4px;">⚠️ ملاحظة للمطوّر</div>
+          <div style="font-size:0.75rem;color:var(--text-secondary);line-height:1.6;">هذه الخاصية تتطلب إعداد خادم Firebase أو WebSocket backend. للتطوير والتكامل الكامل تواصل مع المطوّر على واتساب: <b style="color:var(--primary-light);">0770044850</b></div>
+        </div>
+        <div class="modal-footer" style="margin-top:16px;">
+          <button class="btn btn-success" onclick="saveSyncSettings()">💾 حفظ إعدادات المزامنة</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: الميزان ═══ -->
+    <div class="tab-content" id="tab-scale">
+      <div class="card">
+        <h4 style="color:var(--primary-light);margin-bottom:16px;">⚖️ ربط الميزان الإلكتروني</h4>
+        <div style="background:linear-gradient(135deg,var(--bg-dark),var(--bg-medium));border:1px solid var(--success);border-radius:var(--radius);padding:18px;margin-bottom:18px;">
+          <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.7;">
+            عند ربط الميزان الإلكتروني، تدخل كل عمليات الوزن والمداخيل تلقائياً في خانة <b style="color:var(--primary-light);">⚖️ مداخيل الميزان</b> في إدارة الأعمال.
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div><div class="setting-label">⚖️ تفعيل الميزان الإلكتروني</div><div class="setting-desc">ربط الميزان بالتطبيق تلقائياً</div></div>
+          <label class="toggle-switch"><input type="checkbox" id="scaleEnabled" onchange="toggleScaleSetting()"/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+        </div>
+
+        <div id="scaleConfig" style="display:none;">
+          <div class="setting-row">
+            <div><div class="setting-label">🔌 نوع الاتصال</div></div>
+            <select class="select-field" id="scaleConnectionType" style="width:180px;">
+              <option value="serial">منفذ تسلسلي (Serial COM)</option>
+              <option value="usb">USB مباشر</option>
+              <option value="bluetooth">Bluetooth</option>
+              <option value="network">شبكة (TCP/IP)</option>
+              <option value="manual">يدوي (Manual)</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">📍 منفذ الاتصال</div><div class="setting-desc">مثال: COM3 أو /dev/ttyUSB0</div></div>
+            <input class="input-field" type="text" id="scalePort" placeholder="COM3" style="width:180px;"/>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">⚡ معدل الإرسال (Baud Rate)</div></div>
+            <select class="select-field" id="scaleBaudRate" style="width:180px;">
+              <option value="9600">9600 (الأكثر شيوعاً)</option>
+              <option value="4800">4800</option>
+              <option value="19200">19200</option>
+              <option value="38400">38400</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">🏷️ وحدة الوزن</div></div>
+            <select class="select-field" id="scaleUnit" style="width:180px;">
+              <option value="كغ">كيلوغرام (كغ)</option>
+              <option value="غ">غرام (غ)</option>
+              <option value="ط">طن</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">💰 السعر الافتراضي / كغ</div><div class="setting-desc">يمكن تغييره عند كل عملية</div></div>
+            <input class="input-field" type="number" id="scaleDefaultPrice" placeholder="0.00" style="width:130px;"/>
+          </div>
+          <div style="margin:14px 0;padding:12px;background:var(--bg-dark);border-radius:var(--radius-sm);">
+            <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:8px;">🔴 معاينة الميزان — آخر قراءة:</div>
+            <div id="scalePreview" style="font-size:1.8rem;font-weight:900;color:var(--success);text-align:center;">⚖️ — كغ</div>
+            <div style="font-size:0.75rem;color:var(--text-secondary);text-align:center;margin-top:4px;" id="scalePreviewPrice">السعر: —</div>
+          </div>
+          <button class="btn btn-primary" onclick="testScaleConnection()" style="width:100%;margin-bottom:8px;">🔌 اختبار الاتصال</button>
+          <button class="btn btn-success" onclick="readScaleNow()" style="width:100%;">⚖️ قراءة الوزن الآن</button>
+        </div>
+
+        <div style="margin-top:18px;padding:12px 16px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius-sm);">
+          <div style="font-size:0.78rem;color:var(--warning);font-weight:700;margin-bottom:4px;">⚠️ ملاحظة</div>
+          <div style="font-size:0.75rem;color:var(--text-secondary);line-height:1.6;">الربط التلقائي الكامل يتطلب دعم WebSerial API (متوفر في Chrome/Edge). يمكن استخدام وضع <b>يدوي</b> لإدخال بيانات الميزان مباشرة في إدارة الأعمال.</div>
+        </div>
+        <div class="modal-footer" style="margin-top:16px;">
+          <button class="btn btn-success" onclick="saveScaleSettings()">💾 حفظ إعدادات الميزان</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: حول ═══ -->
+    <div class="tab-content" id="tab-about">
+      <div style="max-width:580px;margin:0 auto;padding:20px 0;">
+
+        <!-- Main license card -->
+        <div style="
+          background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--secondary) 100%);
+          border-radius: 20px;
+          padding: 40px 32px;
+          text-align: center;
+          margin-bottom: 20px;
+          box-shadow: 0 16px 48px var(--glow);
+          position: relative;
+          overflow: hidden;
+        ">
+          <!-- Decorative circles -->
+          <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,0.06);"></div>
+          <div style="position:absolute;bottom:-30px;left:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.06);"></div>
+
+          <!-- Logo -->
+          <div style="font-family:Impact,Arial;font-size:3.5rem;font-weight:900;letter-spacing:2px;margin-bottom:4px;">
+            <span style="color:#fff;">POS</span><span style="color:rgba(255,255,255,0.7);"> DZ</span>
+          </div>
+          <div style="color:rgba(255,255,255,0.8);font-size:0.95rem;margin-bottom:28px;letter-spacing:1px;">
+            نظام نقاط البيع الذكي
+          </div>
+
+          <!-- License status -->
+          <div style="
+            background:rgba(255,255,255,0.15);
+            border:1px solid rgba(255,255,255,0.25);
+            border-radius:14px;
+            padding:20px 28px;
+            display:inline-block;
+            backdrop-filter:blur(10px);
+            min-width:280px;
+          ">
+            <div style="font-size:0.82rem;color:rgba(255,255,255,0.7);margin-bottom:6px;letter-spacing:0.5px;">🔐 حالة الترخيص</div>
+            <div style="color:#4ADE80;font-weight:900;font-size:1.1rem;margin-bottom:14px;">✅ البرنامج مفعّل</div>
+            <div style="display:flex;justify-content:center;gap:28px;">
+              <div>
+                <div style="font-size:0.72rem;color:rgba(255,255,255,0.6);">الإصدار</div>
+                <div style="font-size:1.3rem;font-weight:900;color:#fff;">3.0.1</div>
+              </div>
+              <div style="width:1px;background:rgba(255,255,255,0.2);"></div>
+              <div>
+                <div style="font-size:0.72rem;color:rgba(255,255,255,0.6);">تاريخ الإصدار</div>
+                <div style="font-size:1.3rem;font-weight:900;color:#fff;">2026</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Developer card -->
+        <div style="
+          background: var(--bg-card);
+          border: 1px solid var(--border);
+          border-radius: 16px;
+          padding: 24px 28px;
+          margin-bottom: 16px;
+          display: flex;
+          align-items: center;
+          gap: 20px;
+        ">
+          <div style="
+            width:56px;height:56px;border-radius:50%;
+            background:linear-gradient(135deg,var(--primary),var(--secondary));
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.6rem;flex-shrink:0;
+          ">👨‍💻</div>
+          <div style="flex:1;">
+            <div style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:4px;">المطور</div>
+            <div style="font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:6px;">
+              شركة: بوس ديزاد &nbsp;|&nbsp; ب.حمزة
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);
+                border-radius:8px;padding:4px 12px;font-size:0.85rem;color:#25D366;font-weight:700;">
+                📱 واتساب
+              </span>
+              <span style="font-size:1rem;font-weight:900;color:var(--primary-light);">0770044850</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align:center;color:var(--text-secondary);font-size:0.82rem;padding:8px 0;">
+          2026 بوس ديزاد &nbsp;—&nbsp; جميع الحقوق محفوظة ®
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header"><div class="sidebar-brand">POS DZ</div><div class="sidebar-user" id="sidebarUser"></div></div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="sale.html"><span class="nav-icon">🛒</span><span class="nav-label" data-nav="navSale">واجهة البيع</span></a>
+    <a class="nav-item" href="inventory.html"><span class="nav-icon">📦</span><span class="nav-label" data-nav="navInventory">إدارة المخزون</span></a>
+    <a class="nav-item" href="customers.html"><span class="nav-icon">👥</span><span class="nav-label" data-nav="navCustomers">إدارة الزبائن</span></a>
+    <a class="nav-item" href="reports.html"><span class="nav-icon">📊</span><span class="nav-label" data-nav="navReports">إدارة الأعمال</span></a>
+    <a class="nav-item" href="users.html" data-role="admin"><span class="nav-icon">👤</span><span class="nav-label" data-nav="navUsers">إدارة المستخدمين</span></a>
+    <a class="nav-item" href="suppliers.html"><span class="nav-icon">🚚</span><span class="nav-label" data-nav="navSuppliers">إدارة الموزعين</span></a>
+    <a class="nav-item" href="settings.html"><span class="nav-icon">⚙️</span><span class="nav-label" data-nav="navSettings">الإعدادات العامة</span></a>
+    <div class="nav-item danger" onclick="doLogout()"><span class="nav-icon">🚪</span><span class="nav-label" data-nav="navLogout">إغلاق</span></div>
+  </nav>
+  <div class="sidebar-footer">POS DZ v3.0.1 | 2026 بوس ديزاد ®</div>
+</div>
+<div id="toast-container"></div>
+<script src="app.js"></script>
+<script>
+'use strict';
+
+let currentFontSize = 15;
+let currentAccent   = 'blue_purple';
+let currentBg       = 'dark';
+
+// ═══════════════════════════════════════════════════
+// TRANSLATIONS SYSTEM
+// ═══════════════════════════════════════════════════
+const I18N = {
+  ar: {
+    pageTitle:'⚙️ الإعدادات العامة',
+    tabBtnProgram:'💻 البرنامج', tabBtnStore:'🏪 المتجر', tabBtnPrint:'🖨️ الطباعة',
+    tabBtnSystem:'🔧 النظام', tabBtnAbout:'ℹ️ حول',
+    backBtn:'← رجوع', saveBtn:'💾 حفظ البيانات',
+    labelDate:'📅 صيغة التاريخ', labelCurrency:'💰 رمز العملة',
+    labelLang:'🌐 لغة البرنامج', labelLangDesc:'تطبيق فوري على كل صفحات التطبيق',
+    labelFont:'🔤 خط التطبيق', labelFontSize:'🔡 حجم الخط',
+    labelAccentColor:'🎨 لون الأيقونات والأزرار', labelBgMode:'🌙 وضع الخلفية',
+    bgDark:'داكن — Mode nuit', bgLight:'فاتح — Mode jour',
+    labelSoundAdd:'🔊 صوت إضافة المنتج', labelSoundSell:'🔊 صوت إتمام البيع',
+    labelSoundBtn:'🔊 صوت الأزرار',
+    labelBarcode:'📷 تفعيل قارئ الباركود',
+    labelBarcodeDesc:'جهاز الباركود يضيف المنتجات تلقائياً عند التفعيل',
+    labelBarcodeAuto:'📷 حجز المنتجات تلقائياً',
+    labelTouchKb:'⌨️ الكيبورد الافتراضي (شاشات اللمس)',
+    labelTouchKbDesc:'زر على جانب الشاشة قابل للسحب',
+    navSale:'واجهة البيع', navInventory:'إدارة المخزون',
+    navCustomers:'إدارة الزبائن', navReports:'إدارة الأعمال',
+    navUsers:'إدارة المستخدمين', navSuppliers:'إدارة الموزعين',
+    navSettings:'الإعدادات العامة', navLogout:'إغلاق',
+  },
+  fr: {
+    pageTitle:'⚙️ Paramètres généraux',
+    tabBtnProgram:'💻 Programme', tabBtnStore:'🏪 Boutique', tabBtnPrint:'🖨️ Impression',
+    tabBtnSystem:'🔧 Système', tabBtnAbout:'ℹ️ À propos',
+    backBtn:'← Retour', saveBtn:'💾 Enregistrer',
+    labelDate:'📅 Format de date', labelCurrency:'💰 Devise',
+    labelLang:'🌐 Langue', labelLangDesc:'Appliqué immédiatement à toute l\'application',
+    labelFont:'🔤 Police', labelFontSize:'🔡 Taille de police',
+    labelAccentColor:'🎨 Couleur des icônes', labelBgMode:'🌙 Mode de fond',
+    bgDark:'Sombre — Mode nuit', bgLight:'Clair — Mode jour',
+    labelSoundAdd:'🔊 Son ajout produit', labelSoundSell:'🔊 Son vente terminée',
+    labelSoundBtn:'🔊 Son des boutons',
+    labelBarcode:'📷 Activer lecteur code-barres',
+    labelBarcodeDesc:'Le scanner ajoute les produits automatiquement',
+    labelBarcodeAuto:'📷 Ajout automatique par scanner',
+    labelTouchKb:'⌨️ Clavier tactile (écrans tactiles)',
+    labelTouchKbDesc:'Bouton sur le côté de l\'écran, déplaçable',
+    navSale:'Interface vente', navInventory:'Gestion stock',
+    navCustomers:'Clients', navReports:'Activité commerciale',
+    navUsers:'Utilisateurs', navSuppliers:'Fournisseurs',
+    navSettings:'Paramètres', navLogout:'Déconnexion',
+  },
+  en: {
+    pageTitle:'⚙️ General Settings',
+    tabBtnProgram:'💻 Program', tabBtnStore:'🏪 Store', tabBtnPrint:'🖨️ Printing',
+    tabBtnSystem:'🔧 System', tabBtnAbout:'ℹ️ About',
+    backBtn:'← Back', saveBtn:'💾 Save',
+    labelDate:'📅 Date format', labelCurrency:'💰 Currency',
+    labelLang:'🌐 Language', labelLangDesc:'Applied immediately across all pages',
+    labelFont:'🔤 Font', labelFontSize:'🔡 Font size',
+    labelAccentColor:'🎨 Icon & button color', labelBgMode:'🌙 Background mode',
+    bgDark:'Dark — Night Mode', bgLight:'Light — Day Mode',
+    labelSoundAdd:'🔊 Product add sound', labelSoundSell:'🔊 Sale complete sound',
+    labelSoundBtn:'🔊 Button sounds',
+    labelBarcode:'📷 Enable barcode reader',
+    labelBarcodeDesc:'Scanner adds products automatically when enabled',
+    labelBarcodeAuto:'📷 Auto-add by barcode scanner',
+    labelTouchKb:'⌨️ Touch keyboard (touch screens)',
+    labelTouchKbDesc:'Side button, draggable',
+    navSale:'Sale', navInventory:'Inventory',
+    navCustomers:'Customers', navReports:'Business',
+    navUsers:'Users', navSuppliers:'Suppliers',
+    navSettings:'Settings', navLogout:'Logout',
+  }
+};
+
+function applyTranslation(lang) {
+  const t = I18N[lang] || I18N.ar;
+  const dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+  document.documentElement.dir = dir;
+
+  // Page elements
+  const pageTitle = document.getElementById('pageTitle');
+  if (pageTitle) pageTitle.textContent = t.pageTitle;
+  const backBtn = document.getElementById('backBtn');
+  if (backBtn) backBtn.textContent = t.backBtn;
+
+  // Tab buttons
+  ['tabBtnProgram','tabBtnStore','tabBtnPrint','tabBtnSystem','tabBtnAbout'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && t[id]) el.textContent = t[id];
+  });
+
+  // All data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.dataset.i18n;
+    if (t[k] !== undefined) el.textContent = t[k];
+  });
+
+  // Sidebar nav labels
+  document.querySelectorAll('[data-nav]').forEach(el => {
+    const k = el.dataset.nav;
+    if (t[k] !== undefined) el.textContent = t[k];
+  });
+
+  // Save buttons
+  document.querySelectorAll('[data-i18n="saveBtn"]').forEach(el => {
+    el.textContent = t.saveBtn;
+  });
+
+  // Auto currency for AR
+  if (lang === 'ar') {
+    const cur = document.getElementById('currency');
+    if (cur && (cur.value === 'DA' || !cur.value)) cur.value = 'دج';
+  }
+
+  // Persist to localStorage for other pages
+  localStorage.setItem('posdz_lang', lang);
+}
+
+function onLangChange(lang) {
+  applyTranslation(lang);
+}
+
+// ═══════════════════════════════════════════════════
+// THEME: ACCENT COLOR (only primary colors, NO background)
+// ═══════════════════════════════════════════════════
+function selectAccent(theme) {
+  currentAccent = theme;
+  document.querySelectorAll('.theme-dot').forEach(d => {
+    d.classList.toggle('active', d.dataset.theme === theme);
+  });
+  // Use new data-accent attribute (doesn't touch bg)
+  document.documentElement.setAttribute('data-accent', theme);
+  document.documentElement.setAttribute('data-theme', theme === 'blue_purple' ? '' : theme);
+}
+
+// ═══════════════════════════════════════════════════
+// THEME: BACKGROUND MODE (only bg/text, NO primary)
+// ═══════════════════════════════════════════════════
+function selectBg(mode) {
+  currentBg = mode;
+  // Use new data-bg attribute (doesn't touch primary)
+  document.documentElement.setAttribute('data-bg', mode);
+  const btnD = document.getElementById('btnBgDark');
+  const btnL = document.getElementById('btnBgLight');
+  if (btnD) { btnD.classList.toggle('sel-dark', mode === 'dark'); btnD.classList.remove('sel-light'); }
+  if (btnL) { btnL.classList.toggle('sel-light', mode === 'light'); btnL.classList.remove('sel-dark'); }
+}
+
+// ═══════════════════════════════════════════════════
+// FONT
+// ═══════════════════════════════════════════════════
+function changeFontSize(delta) {
+  currentFontSize = Math.max(11, Math.min(20, currentFontSize + delta));
+  document.getElementById('fontSizeDisplay').textContent = currentFontSize;
+  document.documentElement.style.fontSize = currentFontSize + 'px';
+}
+
+function applyFontPreview(fontName) {
+  document.body.style.fontFamily = `'${fontName}', 'Cairo', sans-serif`;
+  let link = document.getElementById('dyn-font');
+  if (!link) {
+    link = document.createElement('link');
+    link.id = 'dyn-font';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+  }
+  const fontMap = {
+    'Cairo':'Cairo', 'Tajawal':'Tajawal', 'Amiri':'Amiri',
+    'Almarai':'Almarai', 'IBM Plex Sans Arabic':'IBM+Plex+Sans+Arabic'
+  };
+  link.href = `https://fonts.googleapis.com/css2?family=${fontMap[fontName]||'Cairo'}:wght@400;700;900&display=swap`;
+}
+
+// ═══════════════════════════════════════════════════
+// PRINTER
+// ═══════════════════════════════════════════════════
+function openPrinterDialog(type) {
+  // Open system print dialog via a test print window
+  // This opens the OS printer selection (Windows Imprimantes, macOS Print)
+  const paperSize = document.getElementById('paperSize')?.value || '80mm';
+  const widthMap  = {'58mm':'54mm','80mm':'76mm','A5':'148mm','A4':'210mm'};
+  const pw = type === 'invoice' ? (widthMap[paperSize] || '76mm') : '60mm';
+
+  const win = window.open('', '_blank', 'width=450,height=400');
+  if (!win) { toast('⚠️ يرجى السماح بالنوافذ المنبثقة للطباعة', 'warning'); return; }
+
+  const isInvoice = type === 'invoice';
+  const pageContent = isInvoice
+    ? `<div style="text-align:center;padding:15px;font-family:Arial;">
+        <h2 style="color:#333;">🖨️ طباعة تجريبية — فاتورة</h2>
+        <p>هذه طباعة اختبارية<br>اختر الطابعة المناسبة للفواتير</p>
+        <hr/><p style="font-size:13px;font-weight:bold;">POS DZ — فاتورة تجريبية</p>
+        <p>المنتج × الكمية = المجموع</p>
+        <p style="font-size:18px;font-weight:900;">الإجمالي: 500.00 دج</p>
+       </div>`
+    : `<div style="text-align:center;padding:10px;font-family:Arial;width:58mm;">
+        <p style="font-weight:900;font-size:13px;">POS DZ</p>
+        <p style="font-weight:900;">سكر 1كغ</p>
+        <p style="font-family:monospace;">6191234567890</p>
+        <p style="font-size:16px;font-weight:900;">150.00 دج</p>
+       </div>`;
+
+  win.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">
+    <style>
+      @page { size:${pw} auto; margin:4mm; }
+      body { font-family:Arial; color:#000; background:#fff; }
+      @media print { * { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
+    </style></head><body>
+    ${pageContent}
+    <script>
+      window.onload = function() {
+        window.print();
+        window.onafterprint = function() { window.close(); };
+      };
+    <\/script>
+  </body></html>`);
+  win.document.close();
+
+  // Ask user to name the chosen printer
+  setTimeout(() => {
+    const chosen = prompt(
+      isInvoice
+        ? 'اكتب اسم طابعة الفواتير التي اخترتها:'
+        : 'اكتب اسم طابعة الباركود التي اخترتها:',
+      'الطابعة الافتراضية'
+    );
+    if (chosen && chosen.trim()) {
+      const nameEl = document.getElementById(isInvoice ? 'printerInvoiceName' : 'printerBarcodeName');
+      if (nameEl) nameEl.textContent = chosen.trim();
+      const cardEl = document.getElementById(isInvoice ? 'printerInvoiceCard' : 'printerBarcodeCard');
+      if (cardEl) cardEl.classList.add('selected');
+    }
+  }, 500);
+}
+
+function testPrintInvoice() {
+  openPrinterDialog('invoice');
+}
+
+// ═══════════════════════════════════════════════════
+// LIVE INVOICE PREVIEW
+// ═══════════════════════════════════════════════════
+async function updateInvoicePreview() {
+  const sName  = document.getElementById('storeName')?.value    || await getSetting('storeName')    || 'اسم المتجر';
+  const sPhone = document.getElementById('storePhone')?.value   || await getSetting('storePhone')   || '0700 00 00 00';
+  const sAddr  = document.getElementById('storeAddress')?.value || await getSetting('storeAddress') || 'العنوان';
+  const sWelc  = document.getElementById('storeWelcome')?.value || await getSetting('storeWelcome') || 'شكراً لزيارتكم';
+  const cur    = document.getElementById('currency')?.value     || await getSetting('currency')     || 'دج';
+  const ps     = document.getElementById('paperSize')?.value    || '80mm';
+
+  const showName    = document.getElementById('printName')?.checked;
+  const showPhone   = document.getElementById('printPhone')?.checked;
+  const showAddr    = document.getElementById('printAddress')?.checked;
+  const showWelcome = document.getElementById('printWelcome')?.checked;
+  const showBarcode = document.getElementById('printBarcode')?.checked;
+
+  // Line width per paper
+  const lw = {'58mm':30,'80mm':40,'A5':54,'A4':68}[ps] || 40;
+  const H  = '━'.repeat(lw);
+  const L  = '─'.repeat(lw);
+
+  const now   = new Date();
+  const dStr  = now.toLocaleDateString('ar-DZ');
+  const tStr  = now.toLocaleTimeString('ar-DZ',{hour:'2-digit',minute:'2-digit'});
+
+  const ctr = (txt) => {
+    const pad = Math.max(0, Math.floor((lw - txt.length) / 2));
+    return ' '.repeat(pad) + txt;
+  };
+
+  const lines = [];
+  lines.push(`فاتورة: #001        ${dStr} ${tStr}`);
+  lines.push(H);
+  if (showName)                    lines.push(ctr(sName));
+  if (showPhone)                   lines.push(ctr('📞 ' + sPhone));
+  if (showAddr)                    lines.push(ctr('📍 ' + sAddr));
+  if (showName||showPhone||showAddr) lines.push(L);
+  lines.push('المنتج            ك   السعر  المجموع');
+  lines.push(L);
+  lines.push('سكر 1كغ           2   150.00  300.00');
+  lines.push('فرينة              1   200.00  200.00');
+  lines.push('زيت                3    95.00  285.00');
+  lines.push(H);
+  lines.push(`الإجمالي:               785.00 ${cur}`);
+  lines.push(H);
+  if (showWelcome && sWelc) lines.push(ctr(sWelc));
+  if (showBarcode)          lines.push(ctr('||||| #001 |||||'));
+
+  document.getElementById('invoicePreview').textContent = lines.join('\n');
+}
+
+// ═══════════════════════════════════════════════════
+// LIVE BARCODE LABEL PREVIEW
+// ═══════════════════════════════════════════════════
+async function updateBarcodePreview() {
+  const storeName = document.getElementById('storeName')?.value || await getSetting('storeName') || 'POS DZ';
+  const currency  = document.getElementById('currency')?.value  || await getSetting('currency')  || 'دج';
+  const font      = document.getElementById('barcodeFont')?.value || 'Cairo';
+  const btype     = document.getElementById('barcodeType')?.value || 'CODE128';
+
+  const showStore = document.getElementById('barcodeShowStore')?.checked;
+  const showName  = document.getElementById('barcodeShowName')?.checked;
+  const showPrice = document.getElementById('barcodeShowPrice')?.checked;
+
+  const sn = document.getElementById('bpStoreName');
+  const pn = document.getElementById('bpProductName');
+  const pr = document.getElementById('bpPrice');
+
+  if (sn) { sn.textContent = showStore ? storeName : ''; sn.style.fontFamily = font; }
+  if (pn) { pn.style.display = showName ? '' : 'none'; pn.style.fontFamily = font; }
+  if (pr) { pr.style.display = showPrice ? '' : 'none'; pr.textContent = `150.00 ${currency}`; pr.style.fontFamily = font; }
+
+  // Render barcode visuals based on type
+  const barsEl = document.getElementById('bpBars');
+  const codeEl = document.getElementById('bpCode');
+  if (!barsEl) return;
+  barsEl.innerHTML = '';
+  barsEl.style.display = 'flex'; // reset
+
+  if (btype === 'QR') {
+    // QR: render a grid
+    barsEl.style.display = 'block';
+    barsEl.style.height = 'auto';
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(12,5px);gap:1px;width:fit-content;margin:0 auto;';
+    const pattern = [1,0,1,1,0,1,0,1,1,0,1,0,
+                     1,1,0,0,1,0,1,0,0,1,0,1,
+                     1,0,1,0,0,1,1,0,1,0,1,0,
+                     0,1,1,0,1,0,0,1,0,1,1,0,
+                     1,0,0,1,1,0,1,0,1,0,0,1,
+                     0,1,0,0,1,1,0,1,0,0,1,0,
+                     1,1,1,0,0,0,1,1,1,0,0,1,
+                     0,0,1,1,0,1,0,0,1,1,0,0,
+                     1,0,1,0,1,0,1,0,1,0,1,0,
+                     0,1,0,1,0,1,0,1,0,1,0,1,
+                     1,0,0,1,1,0,0,1,1,0,0,1,
+                     0,1,1,0,0,1,1,0,0,1,1,0];
+    pattern.forEach(v => {
+      const cell = document.createElement('div');
+      cell.style.cssText = `width:5px;height:5px;background:${v?'#000':'#fff'};border:0.5px solid #eee;`;
+      grid.appendChild(cell);
+    });
+    barsEl.appendChild(grid);
+    if (codeEl) codeEl.textContent = '6191234567890';
+  } else if (btype === 'EAN13') {
+    // EAN-13: tall narrow bars with guard bars
+    barsEl.style.height = '45px';
+    const code = '6191234567890';
+    for (let i = 0; i < code.length * 3 + 6; i++) {
+      const c  = code.charCodeAt(i % code.length);
+      const isGuard = i < 3 || i > code.length * 3 + 2;
+      const sp = !isGuard && (c + i * 3) % 5 === 0;
+      const w  = isGuard ? 2 : ((c + i) % 3 === 0 ? 3 : 2);
+      const h  = isGuard ? 45 : 38;
+      const bar = document.createElement('div');
+      Object.assign(bar.style, { width:w+'px', height:h+'px', background:sp?'#fff':'#000', display:'inline-block', flexShrink:'0' });
+      barsEl.appendChild(bar);
+    }
+    if (codeEl) codeEl.textContent = '6 191234 567890';
+  } else if (btype === 'EAN8') {
+    barsEl.style.height = '40px';
+    const code = '61912345';
+    for (let i = 0; i < code.length * 4 + 6; i++) {
+      const c  = code.charCodeAt(i % code.length);
+      const sp = (c + i * 3) % 5 === 0;
+      const w  = (c + i) % 3 === 0 ? 3 : 2;
+      const h  = 30 + ((c + i) % 10);
+      const bar = document.createElement('div');
+      Object.assign(bar.style, { width:w+'px', height:h+'px', background:sp?'#fff':'#000', display:'inline-block', flexShrink:'0' });
+      barsEl.appendChild(bar);
+    }
+    if (codeEl) codeEl.textContent = '6191 2345';
+  } else if (btype === 'UPCA') {
+    barsEl.style.height = '45px';
+    const code = '619123456789';
+    for (let i = 0; i < code.length * 3 + 6; i++) {
+      const c  = code.charCodeAt(i % code.length);
+      const sp = (c + i * 3) % 5 === 0;
+      const w  = (c + i) % 3 === 0 ? 3 : 2;
+      const h  = 42;
+      const bar = document.createElement('div');
+      Object.assign(bar.style, { width:w+'px', height:h+'px', background:sp?'#fff':'#000', display:'inline-block', flexShrink:'0' });
+      barsEl.appendChild(bar);
+    }
+    if (codeEl) codeEl.textContent = '6 19123 456789';
+  } else {
+    // CODE128 default — variable height bars
+    barsEl.style.height = '42px';
+    const code = '6191234567890';
+    for (let i = 0; i < code.length * 3 + 10; i++) {
+      const c  = code.charCodeAt(i % code.length);
+      const sp = (c + i * 3) % 5 === 0;
+      const w  = (c + i) % 3 === 0 ? 3 : 2;
+      const h  = 28 + ((c + i * 2) % 14);
+      const bar = document.createElement('div');
+      Object.assign(bar.style, { width:w+'px', height:h+'px', background:sp?'#fff':'#000', display:'inline-block', flexShrink:'0' });
+      barsEl.appendChild(bar);
+    }
+    if (codeEl) codeEl.textContent = '6191234567890';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+async function init() {
+  requireRole(['admin', 'manager']);
+  await initApp();
+  await loadAllSettings();
+  await loadSyncScaleSettings();
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const tabBtnIds = {
+    'program':'tabBtnProgram','store':'tabBtnStore',
+    'print':'tabBtnPrint','sync':'tabBtnSync','scale':'tabBtnScale',
+    'system':'tabBtnSystem','about':'tabBtnAbout'
+  };
+  const btnEl = document.getElementById(tabBtnIds[name]);
+  if (btnEl) btnEl.classList.add('active');
+  const tabEl = document.getElementById('tab-' + name);
+  if (tabEl) tabEl.classList.add('active');
+  if (name === 'print') {
+    updateInvoicePreview();
+    updateBarcodePreview();
+  }
+}
+
+async function loadAllSettings() {
+  const keys = [
+    'dateFormat','currency','language','appFont',
+    'soundAdd','soundSell','soundButtons',
+    'barcodeReader','barcodeAuto','touchKeyboard',
+    'storeName','storePhone','storeAddress','storeWelcome',
+    'invoiceNumber','paperSize',
+    'printLogo','printName','printPhone','printWelcome','printAddress','printBarcode',
+    'barcodeShowStore','barcodeShowName','barcodeShowPrice',
+    'barcodeType','barcodeFont','autoBackup'
+  ];
+  for (const key of keys) {
+    try {
+      const val = await getSetting(key);
+      if (val === null || val === undefined) continue;
+      const el = document.getElementById(key);
+      if (!el) continue;
+      if (el.type === 'checkbox') el.checked = (val === '1');
+      else el.value = val;
+    } catch(e) {}
+  }
+
+  // Font size
+  currentFontSize = parseInt(await getSetting('fontSize')) || 15;
+  document.getElementById('fontSizeDisplay').textContent = currentFontSize;
+  document.documentElement.style.fontSize = currentFontSize + 'px';
+
+  // Accent
+  currentAccent = await getSetting('themeColor') || 'blue_purple';
+  document.querySelectorAll('.theme-dot').forEach(d => {
+    d.classList.toggle('active', d.dataset.theme === currentAccent);
+  });
+  document.documentElement.setAttribute('data-accent', currentAccent);
+  document.documentElement.setAttribute('data-theme', currentAccent === 'blue_purple' ? '' : currentAccent);
+
+  // Background
+  currentBg = await getSetting('bgMode') || 'dark';
+  document.documentElement.setAttribute('data-bg', currentBg);
+  selectBg(currentBg); // update button styles
+
+  // Language
+  const lang = await getSetting('language') || localStorage.getItem('posdz_lang') || 'ar';
+  const langEl = document.getElementById('language');
+  if (langEl) langEl.value = lang;
+  applyTranslation(lang);
+
+  // Font
+  const font = await getSetting('appFont') || 'Cairo';
+  const fontEl = document.getElementById('appFont');
+  if (fontEl) fontEl.value = font;
+  applyFontPreview(font);
+
+  // Logo
+  const logo = await getSetting('storeLogo');
+  if (logo) {
+    const lp = document.getElementById('logoPreview');
+    if (lp) { lp.src = logo; lp.style.display = 'block'; }
+  }
+
+  // Printer names
+  const invP = await getSetting('printerInvoice');
+  if (invP) { const el = document.getElementById('printerInvoiceName'); if (el) el.textContent = invP; }
+  const barP = await getSetting('printerBarcode');
+  if (barP) { const el = document.getElementById('printerBarcodeName'); if (el) el.textContent = barP; }
+
+  // Initial previews
+  await updateBarcodePreview();
+}
+
+// ═══════════════════════════════════════════════════
+// SAVE
+// ═══════════════════════════════════════════════════
+async function saveSettings(section) {
+  if (section === 'program') {
+    await setSetting('dateFormat',    document.getElementById('dateFormat').value);
+    await setSetting('currency',      document.getElementById('currency').value);
+    const lang = document.getElementById('language').value;
+    await setSetting('language',      lang);
+    const font = document.getElementById('appFont').value;
+    await setSetting('appFont',       font);
+    await setSetting('fontSize',      String(currentFontSize));
+    await setSetting('themeColor',    currentAccent);
+    await setSetting('bgMode',        currentBg);
+    await setSetting('soundAdd',      document.getElementById('soundAdd').checked ? '1':'0');
+    await setSetting('soundSell',     document.getElementById('soundSell').checked ? '1':'0');
+    await setSetting('soundButtons',  document.getElementById('soundButtons').checked ? '1':'0');
+    await setSetting('barcodeReader', document.getElementById('barcodeReader').checked ? '1':'0');
+    await setSetting('barcodeAuto',   document.getElementById('barcodeAuto').checked ? '1':'0');
+    await setSetting('touchKeyboard', document.getElementById('touchKeyboard').checked ? '1':'0');
+    applyTranslation(lang);
+    applyFontPreview(font);
+    // Apply new dual-attribute theme system
+    document.documentElement.setAttribute('data-accent', currentAccent);
+    document.documentElement.setAttribute('data-theme', currentAccent === 'blue_purple' ? '' : currentAccent);
+    document.documentElement.setAttribute('data-bg', currentBg);
+  }
+  if (section === 'store') {
+    await setSetting('storeName',    document.getElementById('storeName').value);
+    await setSetting('storePhone',   document.getElementById('storePhone').value);
+    await setSetting('storeAddress', document.getElementById('storeAddress').value);
+    await setSetting('storeWelcome', document.getElementById('storeWelcome').value);
+    const hdr = document.getElementById('headerStoreName');
+    if (hdr) hdr.textContent = document.getElementById('storeName').value;
+  }
+  if (section === 'print') {
+    await setSetting('invoiceNumber', document.getElementById('invoiceNumber').value);
+    await setSetting('paperSize',     document.getElementById('paperSize').value);
+    await setSetting('printLogo',     document.getElementById('printLogo').checked ? '1':'0');
+    await setSetting('printName',     document.getElementById('printName').checked ? '1':'0');
+    await setSetting('printPhone',    document.getElementById('printPhone').checked ? '1':'0');
+    await setSetting('printWelcome',  document.getElementById('printWelcome').checked ? '1':'0');
+    await setSetting('printAddress',  document.getElementById('printAddress').checked ? '1':'0');
+    await setSetting('printBarcode',  document.getElementById('printBarcode').checked ? '1':'0');
+    const invName = document.getElementById('printerInvoiceName')?.textContent;
+    if (invName) await setSetting('printerInvoice', invName);
+  }
+  if (section === 'barcode') {
+    await setSetting('barcodeShowStore', document.getElementById('barcodeShowStore').checked ? '1':'0');
+    await setSetting('barcodeShowName',  document.getElementById('barcodeShowName').checked ? '1':'0');
+    await setSetting('barcodeShowPrice', document.getElementById('barcodeShowPrice').checked ? '1':'0');
+    await setSetting('barcodeType',      document.getElementById('barcodeType').value);
+    await setSetting('barcodeFont',      document.getElementById('barcodeFont').value);
+    const barName = document.getElementById('printerBarcodeName')?.textContent;
+    if (barName) await setSetting('printerBarcode', barName);
+  }
+  if (section === 'system') {
+    await setSetting('autoBackup', document.getElementById('autoBackup').checked ? '1':'0');
+  }
+  toast('✅ تم الحفظ بنجاح', 'success');
+}
+
+// ═══════════════════════════════════════════════════
+// LOGO
+// ═══════════════════════════════════════════════════
+function loadLogo(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const data = e.target.result;
+    await setSetting('storeLogo', data);
+    const lp = document.getElementById('logoPreview');
+    if (lp) { lp.src = data; lp.style.display = 'block'; }
+    toast('تم تحميل الشعار ✅', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function deleteLogo() {
+  await setSetting('storeLogo', '');
+  const lp = document.getElementById('logoPreview');
+  if (lp) { lp.src = ''; lp.style.display = 'none'; }
+  toast('تم حذف الشعار', 'success');
+}
+
+// ═══════════════════════════════════════════════════
+// SYSTEM ACTIONS
+// ═══════════════════════════════════════════════════
+async function partialClear() {
+  if (!confirm('⚠️ سيتم مسح المبيعات، الديون، وسجل العمليات. هل تريد المتابعة؟')) return;
+  if (!confirm('⚠️ تأكيد أخير: هذا الإجراء لا يمكن التراجع عنه!')) return;
+  for (const store of ['sales','saleItems','debts','logs']) {
+    const all = await dbGetAll(store);
+    for (const item of all) await dbDelete(store, item.id);
+  }
+  await resetDailyCounter();
+  toast('✅ تم المسح الجزئي', 'success');
+}
+
+async function fullClear() {
+  if (!confirm('🚨 تحذير: سيتم مسح كل البيانات نهائياً!')) return;
+  if (!confirm('🚨 تأكيد أخير: هذا الإجراء لا يمكن التراجع عنه!')) return;
+  for (const s of ['products','families','customers','suppliers','sales','saleItems','debts','logs']) {
+    const all = await dbGetAll(s);
+    for (const item of all) await dbDelete(s, item.id);
+  }
+  await resetDailyCounter();
+  toast('⚠️ تم المسح الكلي', 'warning', 4000);
+}
+
+
+// ── Sync Settings ──
+function toggleSync() {
+  const enabled = document.getElementById('syncEnabled').checked;
+  document.getElementById('syncConfig').style.display = enabled ? 'block' : 'none';
+}
+async function saveSyncSettings() {
+  await setSetting('syncEnabled', document.getElementById('syncEnabled').checked ? '1' : '0');
+  await setSetting('syncServerKey', document.getElementById('syncServerKey').value);
+  await setSetting('syncStoreId', document.getElementById('syncStoreId').value);
+  await setSetting('syncOfflineFirst', document.getElementById('syncOfflineFirst').checked ? '1' : '0');
+  toast('✅ تم حفظ إعدادات المزامنة', 'success');
+}
+async function testSync() {
+  toast('🔄 جاري اختبار الاتصال...', 'info', 2000);
+  setTimeout(() => toast('⚠️ المزامنة تحتاج إعداد خادم — تواصل مع المطوّر', 'warning', 3000), 2000);
+}
+
+// ── Scale Settings ──
+function toggleScaleSetting() {
+  const enabled = document.getElementById('scaleEnabled').checked;
+  document.getElementById('scaleConfig').style.display = enabled ? 'block' : 'none';
+}
+async function saveScaleSettings() {
+  await setSetting('scaleEnabled',      document.getElementById('scaleEnabled').checked ? '1' : '0');
+  await setSetting('scaleConnectionType', document.getElementById('scaleConnectionType').value);
+  await setSetting('scalePort',         document.getElementById('scalePort').value);
+  await setSetting('scaleBaudRate',     document.getElementById('scaleBaudRate').value);
+  await setSetting('scaleUnit',         document.getElementById('scaleUnit').value);
+  await setSetting('scaleDefaultPrice', document.getElementById('scaleDefaultPrice').value);
+  toast('✅ تم حفظ إعدادات الميزان', 'success');
+}
+async function testScaleConnection() {
+  toast('🔌 جاري البحث عن الميزان...', 'info', 2000);
+  // WebSerial API check
+  if ('serial' in navigator) {
+    toast('✅ المتصفح يدعم WebSerial — يمكن ربط الميزان', 'success', 3000);
+  } else {
+    toast('⚠️ المتصفح لا يدعم WebSerial — استخدم Chrome أو Edge', 'warning', 3000);
+  }
+}
+async function readScaleNow() {
+  // Simulate scale read — in production, this reads from WebSerial
+  const weight = (Math.random() * 5 + 0.1).toFixed(3);
+  const price = parseFloat(document.getElementById('scaleDefaultPrice')?.value) || 0;
+  const unit  = document.getElementById('scaleUnit')?.value || 'كغ';
+  document.getElementById('scalePreview').textContent = `⚖️ ${weight} ${unit}`;
+  document.getElementById('scalePreviewPrice').textContent = price > 0 ? `السعر: ${(weight * price).toFixed(2)} DA` : 'السعر: لم يُحدَّد';
+  toast(`⚖️ قراءة: ${weight} ${unit}`, 'info', 2000);
+}
+
+// Load sync/scale settings on init
+async function loadSyncScaleSettings() {
+  const syncEn = await getSetting('syncEnabled');
+  if (syncEn === '1') {
+    document.getElementById('syncEnabled').checked = true;
+    document.getElementById('syncConfig').style.display = 'block';
+    document.getElementById('syncServerKey').value = await getSetting('syncServerKey') || '';
+    document.getElementById('syncStoreId').value   = await getSetting('syncStoreId') || '';
+    const offFirst = await getSetting('syncOfflineFirst');
+    document.getElementById('syncOfflineFirst').checked = offFirst !== '0';
+  }
+  const scaleEn = await getSetting('scaleEnabled');
+  if (scaleEn === '1') {
+    document.getElementById('scaleEnabled').checked = true;
+    document.getElementById('scaleConfig').style.display = 'block';
+    document.getElementById('scaleConnectionType').value = await getSetting('scaleConnectionType') || 'serial';
+    document.getElementById('scalePort').value            = await getSetting('scalePort') || 'COM3';
+    document.getElementById('scaleBaudRate').value        = await getSetting('scaleBaudRate') || '9600';
+    document.getElementById('scaleUnit').value            = await getSetting('scaleUnit') || 'كغ';
+    document.getElementById('scaleDefaultPrice').value    = await getSetting('scaleDefaultPrice') || '';
+  }
+}
+
+function doLogout() {
+  if (confirm('تسجيل الخروج؟')) { clearSession(); window.location.href = 'index.html'; }
+}
+
+init();
+</script>
+</body>
+</html>
