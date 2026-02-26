@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POS DZ - واجهة البيع</title>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body { overflow: hidden; }
+    .sale-layout { display: flex; flex-direction: column; height: 100vh; }
+    .sale-body { flex: 1; display: flex; flex-direction: column; padding: 12px; gap: 8px; overflow: hidden; }
+
+    .search-wrap { position: relative; }
+    .search-bar { margin-bottom: 0; }
+
+    .cart-area { flex: 1; overflow-y: auto; background: var(--bg-medium); border-radius: var(--radius); border: 1px solid var(--border); }
+    .cart-header-row { display: grid; grid-template-columns: 1fr 110px 110px 110px 44px; gap: 8px; padding: 10px 12px; background: var(--bg-dark); border-bottom: 2px solid var(--primary); font-size: 0.8rem; color: var(--text-secondary); font-weight: 700; }
+    .cart-item-row { display: grid; grid-template-columns: 1fr 110px 110px 110px 44px; gap: 8px; padding: 7px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: center; transition: background 0.15s; }
+    .cart-item-row:hover { background: rgba(124,58,237,0.06); }
+    .cart-item-row:nth-child(even) { background: rgba(255,255,255,0.015); }
+    .cart-input { background: transparent; border: 1px solid transparent; color: var(--text-primary); padding: 5px 6px; border-radius: 5px; font-family: 'Cairo', sans-serif; font-size: 0.9rem; width: 100%; outline: none; text-align: right; transition: border-color 0.15s; }
+    .cart-input:focus { border-color: var(--primary); background: var(--bg-input); }
+    .total-cell { color: var(--primary-light); font-weight: 700; font-size: 0.92rem; text-align: center; }
+    .del-btn { background: transparent; border: none; color: var(--danger); font-size: 1.1rem; cursor: pointer; padding: 4px 8px; border-radius: 5px; transition: background 0.15s; }
+    .del-btn:hover { background: rgba(239,68,68,0.15); }
+
+    .discount-row { display: flex; align-items: center; gap: 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; }
+    .discount-row label { font-size: 0.88rem; color: var(--text-secondary); white-space: nowrap; }
+    .discount-row input { flex: 1; max-width: 140px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); padding: 7px 10px; font-family: 'Cairo', sans-serif; font-size: 0.95rem; outline: none; text-align: center; }
+    .discount-row input:focus { border-color: var(--primary); }
+
+    .total-box { display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); border: 2px solid var(--primary); border-radius: var(--radius); padding: 12px 20px; box-shadow: 0 0 20px rgba(124,58,237,0.15); }
+    .total-amount { font-family: Impact, sans-serif; font-size: 2.2rem; color: var(--primary-light); text-shadow: 0 0 14px var(--glow); }
+    .items-count { font-size: 0.82rem; color: var(--text-secondary); text-align: left; }
+
+    /* Debt / Customer Row — only for debt operations */
+    .debt-row {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 9px 14px;
+      flex-wrap: wrap;
+    }
+    .debt-row label { font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; }
+    .debt-row input {
+      width: 120px; background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text-primary); padding: 7px 10px;
+      font-family: 'Cairo', sans-serif; font-size: 0.92rem; outline: none; text-align: center;
+    }
+    .debt-row input:focus { border-color: var(--primary); }
+    /* Customer select — name only display */
+    .customer-select-wrap { flex: 1; min-width: 160px; max-width: 240px; position: relative; }
+    .customer-select-wrap select {
+      width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text-primary); padding: 7px 10px;
+      font-family: 'Cairo', sans-serif; font-size: 0.92rem; outline: none;
+      appearance: none; -webkit-appearance: none;
+    }
+    .customer-select-wrap select:focus { border-color: var(--primary); }
+    .customer-select-wrap::after {
+      content: '▼'; position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--text-secondary); font-size: 0.7rem; pointer-events: none;
+    }
+
+    .action-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .action-btns .btn { font-size: 1rem; padding: 13px 10px; border-radius: var(--radius); }
+
+    .vkb-toggle {
+      position: fixed; bottom: 80px; left: 0;
+      background: var(--primary); color: #fff;
+      border: none; border-radius: 0 8px 8px 0;
+      padding: 10px 8px; cursor: pointer;
+      writing-mode: vertical-rl; font-size: 0.78rem;
+      font-family: 'Cairo', sans-serif; font-weight: 700;
+      z-index: 400; box-shadow: 2px 0 12px rgba(0,0,0,0.3);
+      transition: var(--transition); letter-spacing: 1px;
+    }
+    .vkb-toggle:hover { background: var(--primary-dark); padding-left: 12px; }
+    .vkb-panel {
+      position: fixed; bottom: 20px; left: 20px;
+      z-index: 450; display: none;
+      background: var(--bg-dark);
+      border: 1px solid var(--primary);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      cursor: move; user-select: none;
+    }
+    .vkb-panel.open { display: block; }
+    .vkb-panel-header {
+      background: var(--bg-medium); padding: 8px 12px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-radius: var(--radius) var(--radius) 0 0;
+      font-size: 0.82rem; color: var(--text-secondary);
+    }
+    .vkb-panel-close { background:none;border:none;color:var(--danger);cursor:pointer;font-size:1rem; }
+  </style>
+</head>
+<body>
+<div class="bg-animated"></div>
+<div class="sale-layout">
+  <header class="app-header">
+    <button class="menu-btn" id="menuBtn" title="القائمة الرئيسية">☰</button>
+    <span class="store-name" id="headerStoreName">اسم المتجر</span>
+    <div class="app-brand">
+      <span class="brand-title">POS DZ</span>
+      <span class="brand-clock" id="clockDisplay"></span>
+    </div>
+  </header>
+
+  <div class="sale-body">
+    <!-- Search -->
+    <div class="search-wrap">
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="ابحث عن منتج أو امسح الباركود..." autocomplete="off"/>
+        <span class="search-icon">📷</span>
+      </div>
+      <div class="autocomplete-list" id="autocompleteList"></div>
+    </div>
+
+    <!-- Cart -->
+    <div class="cart-area" id="cartArea">
+      <div class="cart-header-row">
+        <span>المنتج</span>
+        <span style="text-align:center">الكمية</span>
+        <span style="text-align:center">السعر</span>
+        <span style="text-align:center">المجموع</span>
+        <span style="text-align:center">🗑</span>
+      </div>
+      <div id="cartItems"></div>
+    </div>
+
+    <!-- Discount -->
+    <div class="discount-row">
+      <label>🏷️ الخصم:</label>
+      <input type="number" id="discountInput" placeholder="0.00" min="0" oninput="updateTotal()"/>
+      <div class="discount-pills">
+        <button class="disc-pill" onclick="applyPct(1)">1%</button>
+        <button class="disc-pill" onclick="applyPct(2)">2%</button>
+        <button class="disc-pill" onclick="applyPct(3)">3%</button>
+        <button class="disc-pill" onclick="applyPct(5)">5%</button>
+        <button class="disc-pill" onclick="applyPct(10)">10%</button>
+      </div>
+    </div>
+
+    <!-- Total -->
+    <div class="total-box">
+      <div>
+        <div class="total-amount" id="totalAmount">0.00 DA</div>
+        <div class="items-count" id="itemsCount">0 صنف</div>
+      </div>
+      <div style="text-align:left;">
+        <div style="font-size:0.82rem;color:var(--text-secondary)">الإجمالي</div>
+        <div style="font-size:0.82rem;color:var(--text-secondary)" id="discountBadge"></div>
+      </div>
+    </div>
+
+    <!-- Debt/Customer Row — for debt & partial only -->
+    <div class="debt-row">
+      <label>💳 المبلغ المدفوع:</label>
+      <input type="number" id="paidInput" placeholder="0.00" min="0" title="يُستخدم فقط لعمليات الديون والتسديد الجزئي"/>
+      <label>👤 الزبون:</label>
+      <div class="customer-select-wrap">
+        <select id="customerSelect">
+          <option value="">— اختر الزبون —</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-btns">
+      <button class="btn btn-success btn-lg" onclick="openCheckout()" title="تسديد الفاتورة كاملاً">✅ تسديد</button>
+      <button class="btn btn-primary btn-lg" onclick="partialPayment()" title="تسديد جزء — الباقي يُسجل كدين على الزبون">🔢 جزئي + دين</button>
+      <button class="btn btn-warning btn-lg" onclick="registerDebt()" title="تسجيل الفاتورة كاملاً كدين على الزبون">📋 دين كامل</button>
+    </div>
+  </div>
+</div>
+
+<!-- Checkout Modal -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title">✅ تأكيد البيع</span>
+      <button class="modal-close" onclick="closeModal('checkoutModal')">✕</button>
+    </div>
+    <div id="checkoutSummary" style="margin-bottom:16px;"></div>
+    <div class="input-group">
+      <label class="input-label">💵 المبلغ المقدم من الزبون</label>
+      <input class="input-field" type="number" id="checkoutPaid" placeholder="0.00" oninput="updateChange()" style="font-size:1.3rem;text-align:center;"/>
+    </div>
+    <div id="changeDisplay" style="text-align:center;font-size:1.1rem;font-weight:700;color:var(--success);margin:10px 0;"></div>
+    <div class="input-group">
+      <label class="input-label">🖨️ طباعة الفاتورة؟</label>
+      <label class="toggle-switch"><input type="checkbox" id="checkoutPrint" checked/><div class="toggle-track"><div class="toggle-thumb"></div></div></label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-success" onclick="confirmSale()">✅ تأكيد البيع</button>
+      <button class="btn btn-secondary" onclick="closeModal('checkoutModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- Floating VKB -->
+<button class="vkb-toggle" onclick="toggleVKB()" title="لوحة المفاتيح الافتراضية">⌨ لوحة</button>
+<div class="vkb-panel" id="vkbPanel">
+  <div class="vkb-panel-header" id="vkbPanelHeader">
+    <span id="vkbTitle">⌨️ لوحة المفاتيح</span>
+    <div style="display:flex;gap:4px;align-items:center;">
+      <button class="vkb-lang-btn" onclick="setVKBLang('ar')" id="vkbLangAr" style="font-size:0.65rem;padding:2px 5px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.3);color:#fff;cursor:pointer;">ع</button>
+      <button class="vkb-lang-btn" onclick="setVKBLang('fr')" id="vkbLangFr" style="font-size:0.65rem;padding:2px 5px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:#fff;cursor:pointer;">FR</button>
+      <button class="vkb-lang-btn" onclick="setVKBLang('en')" id="vkbLangEn" style="font-size:0.65rem;padding:2px 5px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:#fff;cursor:pointer;">EN</button>
+      <button class="vkb-panel-close" onclick="toggleVKB()">✕</button>
+    </div>
+  </div>
+  <div style="padding:8px;" id="vkbKeys"></div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand">POS DZ</div>
+    <div class="sidebar-user" id="sidebarUser"></div>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="nav-item" href="sale.html"><span class="nav-icon">🛒</span><span class="nav-label">واجهة البيع</span></a>
+    <a class="nav-item" href="inventory.html" data-role="admin,manager"><span class="nav-icon">📦</span><span class="nav-label">إدارة المخزون</span></a>
+    <a class="nav-item" href="customers.html" data-role="admin,manager,seller"><span class="nav-icon">👥</span><span class="nav-label">إدارة الزبائن</span></a>
+    <a class="nav-item" href="reports.html" data-role="admin,manager"><span class="nav-icon">📊</span><span class="nav-label">إدارة الأعمال</span></a>
+    <a class="nav-item" href="users.html" data-role="admin"><span class="nav-icon">👤</span><span class="nav-label">إدارة المستخدمين</span></a>
+    <a class="nav-item" href="suppliers.html" data-role="admin,manager"><span class="nav-icon">🚚</span><span class="nav-label">إدارة الموزعين</span></a>
+    <a class="nav-item" href="settings.html" data-role="admin,manager"><span class="nav-icon">⚙️</span><span class="nav-label">الإعدادات العامة</span></a>
+    <div class="nav-item danger" onclick="doLogout()"><span class="nav-icon">🚪</span><span class="nav-label">إغلاق التطبيق</span></div>
+  </nav>
+  <div class="sidebar-footer">POS DZ v3.0.1 | 2026 بوس ديزاد ®</div>
+</div>
+<div id="toast-container"></div>
+<script src="app.js"></script>
+<script>
+'use strict';
+let cart = JSON.parse(sessionStorage.getItem('posdz_cart') || '[]');
+let allProducts = [];
+let currency = 'DA';
+let activeInput = null;
+
+function saveCartSession() { sessionStorage.setItem('posdz_cart', JSON.stringify(cart)); }
+
+async function init() {
+  requireAuth();
+  await initApp();
+  currency = await getSetting('currency') || 'DA';
+  allProducts = await dbGetAll('products');
+  await loadCustomerSelect();
+  renderCart();
+  updateTotal();
+  initSearch();
+  initBarcodeScanner(async (code) => {
+    const p = allProducts.find(x => x.barcode === code);
+    if (p) { addToCart(p); playSound('add'); }
+    else toast('⚠️ باركود غير موجود: ' + code, 'warning');
+  });
+  document.addEventListener('focusin', e => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') activeInput = e.target;
+  });
+  initDraggableVKB();
+  const lang = await getSetting('language') || localStorage.getItem('posdz_lang') || 'ar';
+  setVKBLang(lang === 'fr' ? 'fr' : lang === 'en' ? 'en' : 'ar');
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'posdz_lang') {
+      const nl = e.newValue || 'ar';
+      setVKBLang(nl === 'fr' ? 'fr' : nl === 'en' ? 'en' : 'ar');
+    }
+  });
+}
+
+// Load customers — show name only in select
+async function loadCustomerSelect() {
+  const customers = await dbGetAll('customers');
+  const sel = document.getElementById('customerSelect');
+  sel.innerHTML = '<option value="">— اختر الزبون —</option>';
+  customers.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.name; // NAME ONLY — no phone
+    sel.appendChild(opt);
+  });
+}
+
+function renderCart() {
+  const container = document.getElementById('cartItems');
+  if (!cart.length) {
+    container.innerHTML = '<div class="empty-state" style="padding:30px;"><div class="empty-icon">🛒</div><p>السلة فارغة</p></div>';
+    return;
+  }
+  container.innerHTML = cart.map((item, idx) => `
+    <div class="cart-item-row">
+      <span style="font-size:0.9rem;font-weight:600;">${item.name}</span>
+      <input type="number" class="cart-input" value="${item.quantity}" min="1"
+        onchange="updateQty(${idx}, this.value)" style="text-align:center;"/>
+      <input type="number" class="cart-input" value="${item.unitPrice.toFixed(2)}" min="0" step="0.01"
+        onchange="updatePrice(${idx}, this.value)" style="text-align:center;"/>
+      <span class="total-cell">${item.total.toFixed(2)}</span>
+      <button class="del-btn" onclick="removeFromCart(${idx})" title="حذف">✕</button>
+    </div>`).join('');
+}
+
+function addToCart(product) {
+  const idx = cart.findIndex(i => i.productId === product.id);
+  if (idx >= 0) { cart[idx].quantity++; cart[idx].total = cart[idx].quantity * cart[idx].unitPrice; }
+  else cart.push({ productId: product.id, name: product.name, quantity: 1, unitPrice: product.sellPrice, total: product.sellPrice });
+  saveCartSession(); renderCart(); updateTotal(); playSound('add');
+}
+
+function updateQty(idx, val) {
+  const q = Math.max(1, parseInt(val) || 1);
+  cart[idx].quantity = q; cart[idx].total = q * cart[idx].unitPrice;
+  saveCartSession(); renderCart(); updateTotal();
+}
+function updatePrice(idx, val) {
+  const p = Math.max(0, parseFloat(val) || 0);
+  cart[idx].unitPrice = p; cart[idx].total = cart[idx].quantity * p;
+  saveCartSession(); updateTotal();
+}
+function removeFromCart(idx) { cart.splice(idx, 1); saveCartSession(); renderCart(); updateTotal(); }
+
+function getTotal() {
+  const subtotal = cart.reduce((s, i) => s + i.total, 0);
+  const disc = parseFloat(document.getElementById('discountInput').value) || 0;
+  return { total: Math.max(0, subtotal - disc), subtotal, discount: disc };
+}
+
+function updateTotal() {
+  const { total, discount } = getTotal();
+  document.getElementById('totalAmount').textContent = total.toFixed(2) + ' ' + currency;
+  document.getElementById('itemsCount').textContent = cart.reduce((s,i) => s + i.quantity, 0) + ' صنف';
+  document.getElementById('discountBadge').textContent = discount > 0 ? `خصم: ${discount.toFixed(2)}` : '';
+}
+
+function applyPct(pct) {
+  const { subtotal } = getTotal();
+  document.getElementById('discountInput').value = (subtotal * pct / 100).toFixed(2);
+  document.querySelectorAll('.disc-pill').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  updateTotal();
+}
+
+// ── Checkout (full sale) ──
+function openCheckout() {
+  if (!cart.length) { toast('السلة فارغة!', 'warning'); return; }
+  const { total } = getTotal();
+  document.getElementById('checkoutSummary').innerHTML = `
+    <div style="text-align:center;font-size:1.4rem;font-weight:900;color:var(--primary-light);margin-bottom:8px;">
+      ${total.toFixed(2)} ${currency}
+    </div>
+    <div style="text-align:center;color:var(--text-secondary);font-size:0.88rem;">${cart.length} صنف</div>`;
+  document.getElementById('checkoutPaid').value = '';
+  document.getElementById('changeDisplay').textContent = '';
+  openModal('checkoutModal');
+}
+
+function updateChange() {
+  const { total } = getTotal();
+  const paid = parseFloat(document.getElementById('checkoutPaid').value) || 0;
+  const change = paid - total;
+  const el = document.getElementById('changeDisplay');
+  if (paid > 0) {
+    el.textContent = change >= 0 ? `الباقي: ${change.toFixed(2)} ${currency}` : `ناقص: ${Math.abs(change).toFixed(2)} ${currency}`;
+    el.style.color = change >= 0 ? 'var(--success)' : 'var(--danger)';
+  } else { el.textContent = ''; }
+}
+
+async function confirmSale() {
+  const { total, discount } = getTotal();
+  const paid = parseFloat(document.getElementById('checkoutPaid').value) || total;
+  const print = document.getElementById('checkoutPrint').checked;
+  const invoiceNumber = await getNextInvoiceNumber();
+  const user = getSession();
+  const customerId = parseInt(document.getElementById('customerSelect').value) || null;
+  const customer = customerId ? (await dbGetAll('customers')).find(c => c.id === customerId) : null;
+
+  const saleId = await dbAdd('sales', {
+    invoiceNumber, userId: user.id, customerId: customerId || 0,
+    total, discount, paid: Math.min(paid, total),
+    isDebt: 0, isCancelled: 0, date: new Date().toISOString()
+  });
+  for (const item of cart) {
+    await dbAdd('saleItems', { saleId, productId: item.productId, productName: item.name, quantity: item.quantity, unitPrice: item.unitPrice, total: item.total });
+    // Decrement stock
+    const prod = await dbGet('products', item.productId);
+    if (prod) { prod.quantity = Math.max(0, prod.quantity - item.quantity); await dbPut('products', prod); }
+  }
+  await dbAdd('logs', { action: 'sale', details: `بيع ${invoiceNumber} — ${total.toFixed(2)} ${currency}`, date: new Date().toISOString() });
+  if (print) {
+    const sale = { invoiceNumber, total, discount, paid: Math.min(paid, total), isDebt: 0, date: new Date().toISOString(), customerName: customer ? customer.name : '' };
+    const items = cart.map(i => ({ productName: i.name, quantity: i.quantity, unitPrice: i.unitPrice, total: i.total }));
+    await printInvoice(sale, items);
+  }
+  closeModal('checkoutModal');
+  playSound('sell');
+  toast('✅ تم البيع — فاتورة ' + invoiceNumber, 'success');
+  clearCart();
+}
+
+// ── Partial Payment: paid portion = normal sale, remaining = debt ──
+async function partialPayment() {
+  if (!cart.length) { toast('السلة فارغة!', 'warning'); return; }
+  const customerId = parseInt(document.getElementById('customerSelect').value);
+  if (!customerId) { toast('⚠️ يرجى اختيار الزبون للتسديد الجزئي', 'warning'); return; }
+
+  const paidInput = parseFloat(document.getElementById('paidInput').value) || 0;
+  if (paidInput <= 0) { toast('⚠️ أدخل المبلغ المدفوع في خانة المبلغ المدفوع', 'warning'); return; }
+
+  const { total, discount } = getTotal();
+  if (paidInput >= total) { toast('المبلغ يغطي الكل — استخدم زر التسديد', 'warning'); return; }
+
+  const debtAmount = total - paidInput;
+  const invoiceNumber = await getNextInvoiceNumber();
+  const user = getSession();
+  const customers = await dbGetAll('customers');
+  const customer = customers.find(c => c.id === customerId);
+  const now = new Date().toISOString();
+
+  // ① بيع عادي للجزء المدفوع (isDebt=0 — يُحتسب في المداخيل)
+  const saleId = await dbAdd('sales', {
+    invoiceNumber, userId: user.id, customerId,
+    total, discount, paid: paidInput,
+    isDebt: 1, isCancelled: 0,            // isDebt=1 لربطه بالدين في التقارير
+    date: now,
+    note: `بيع جزئي — مدفوع: ${paidInput.toFixed(2)} — دين: ${debtAmount.toFixed(2)}`
+  });
+  for (const item of cart) {
+    await dbAdd('saleItems', { saleId, productId: item.productId, productName: item.name, quantity: item.quantity, unitPrice: item.unitPrice, total: item.total });
+    const prod = await dbGet('products', item.productId);
+    if (prod) { prod.quantity = Math.max(0, prod.quantity - item.quantity); await dbPut('products', prod); }
+  }
+
+  // ② تسجيل بيع عادي للجزء المدفوع فقط (يظهر في المداخيل اليومية)
+  const paidInvoice = await getNextInvoiceNumber();
+  await dbAdd('sales', {
+    invoiceNumber: paidInvoice, userId: user.id, customerId,
+    total: paidInput, discount: 0, paid: paidInput,
+    isDebt: 0, isCancelled: 0,
+    date: now,
+    debtSettlement: false,
+    note: `الجزء المدفوع من فاتورة ${invoiceNumber}`
+  });
+
+  // ③ تسجيل الدين للجزء المتبقي تحت اسم الزبون
+  await dbAdd('debts', {
+    customerId, saleId,
+    amount: debtAmount,
+    originalAmount: total,               // الأصل = كامل المبلغ
+    paidAtSale: paidInput,               // ما دُفع عند البيع
+    isPaid: 0,
+    date: now
+  });
+  await dbAdd('logs', {
+    action: 'partial_sale',
+    details: `بيع جزئي ${invoiceNumber} — مدفوع: ${paidInput.toFixed(2)} — دين: ${debtAmount.toFixed(2)} — ${customer ? customer.name : ''}`,
+    date: now
+  });
+
+  playSound('sell');
+  toast(`✅ تم: مدفوع ${paidInput.toFixed(2)} ${currency} — دين ${debtAmount.toFixed(2)} ${currency} على ${customer ? customer.name : '—'}`, 'success', 4000);
+
+  if (confirm('هل تريد طباعة فاتورة الدين؟')) {
+    const saleObj = { invoiceNumber, total, discount, paid: paidInput, isDebt: 1, date: now,
+                      customerName: customer ? customer.name : '', customerPhone: customer ? customer.phone : '' };
+    const items = cart.map(i => ({ productName: i.name, quantity: i.quantity, unitPrice: i.unitPrice, total: i.total }));
+    await printInvoice(saleObj, items);
+  }
+  clearCart();
+}
+
+// ── Full Debt ──
+async function registerDebt() {
+  if (!cart.length) { toast('السلة فارغة!', 'warning'); return; }
+  const customerId = parseInt(document.getElementById('customerSelect').value);
+  if (!customerId) { toast('⚠️ يرجى اختيار الزبون لتسجيل الدين', 'warning'); return; }
+
+  const { total, discount } = getTotal();
+  const invoiceNumber = await getNextInvoiceNumber();
+  const user = getSession();
+  const customer = (await dbGetAll('customers')).find(c => c.id === customerId);
+
+  const saleId = await dbAdd('sales', {
+    invoiceNumber, userId: user.id, customerId, total, discount,
+    paid: 0, isDebt: 1, isCancelled: 0, date: new Date().toISOString()
+  });
+  for (const item of cart) {
+    await dbAdd('saleItems', { saleId, productId: item.productId, productName: item.name, quantity: item.quantity, unitPrice: item.unitPrice, total: item.total });
+    const prod = await dbGet('products', item.productId);
+    if (prod) { prod.quantity = Math.max(0, prod.quantity - item.quantity); await dbPut('products', prod); }
+  }
+  await dbAdd('debts', { customerId, saleId, amount: total, originalAmount: total, isPaid: 0, date: new Date().toISOString() });
+  await dbAdd('logs', { action: 'debt', details: `دين ${invoiceNumber} — ${total.toFixed(2)} ${currency} — ${customer ? customer.name : ''}`, date: new Date().toISOString() });
+
+  toast(`📋 تم تسجيل دين ${total.toFixed(2)} ${currency} على ${customer ? customer.name : '—'}`, 'warning', 3500);
+  if (confirm('هل تريد طباعة فاتورة الدين؟')) {
+    const sale = { invoiceNumber, total, discount, paid: 0, isDebt: 1, date: new Date().toISOString(), customerName: customer ? customer.name : '' };
+    const items = cart.map(i => ({ productName: i.name, quantity: i.quantity, unitPrice: i.unitPrice, total: i.total }));
+    await printInvoice(sale, items);
+  }
+  clearCart();
+}
+
+function clearCart() {
+  cart = [];
+  sessionStorage.removeItem('posdz_cart');
+  document.getElementById('discountInput').value = '';
+  document.getElementById('paidInput').value = '';
+  document.getElementById('customerSelect').value = '';
+  document.querySelectorAll('.disc-pill').forEach(b => b.classList.remove('active'));
+  renderCart(); updateTotal();
+}
+
+// ── Search ──
+function initSearch() {
+  const input = document.getElementById('searchInput');
+  const list = document.getElementById('autocompleteList');
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (!q) { list.innerHTML = ''; list.style.display = 'none'; return; }
+    const matches = allProducts.filter(p => p.name.toLowerCase().includes(q) || (p.barcode && p.barcode.includes(q))).slice(0, 8);
+    if (!matches.length) { list.innerHTML = ''; list.style.display = 'none'; return; }
+    list.style.display = 'block';
+    list.innerHTML = matches.map(p =>
+      `<div class="autocomplete-item" onclick="selectProduct(${p.id})">
+        <span>${p.name}</span>
+        <span style="color:var(--primary-light);font-weight:700;">${p.sellPrice.toFixed(2)} ${currency}</span>
+      </div>`).join('');
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('.search-wrap')) { list.innerHTML = ''; list.style.display = 'none'; } });
+}
+
+function selectProduct(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (p) { addToCart(p); document.getElementById('searchInput').value = ''; document.getElementById('autocompleteList').style.display = 'none'; }
+}
+
+// ── VKB ──
+const VKB_LAYOUTS = {
+  ar: { title:'⌨️ لوحة عربية', rows:[['1','2','3','4','5','6','7','8','9','0','⌫'],['ض','ص','ث','ق','ف','غ','ع','ه','خ','ح','ج'],['ش','س','ي','ب','ل','ا','ت','ن','م','ك','ط'],['ئ','ء','ؤ','ر','لا','ى','ة','و','ز','ظ'],['SPACE']] },
+  fr: { title:'⌨️ Clavier Français', rows:[['1','2','3','4','5','6','7','8','9','0','⌫'],['a','z','e','r','t','y','u','i','o','p'],['q','s','d','f','g','h','j','k','l','m'],['w','x','c','v','b','n',',','.','!','?'],['é','è','ê','à','ù','â','ô','î','û','ç'],['SPACE']] },
+  en: { title:'⌨️ English Keyboard', rows:[['1','2','3','4','5','6','7','8','9','0','⌫'],['q','w','e','r','t','y','u','i','o','p'],['a','s','d','f','g','h','j','k','l'],['z','x','c','v','b','n','m',',','.'],['SPACE']] }
+};
+let currentVKBLang = 'ar';
+function setVKBLang(lang) {
+  currentVKBLang = lang;
+  const layout = VKB_LAYOUTS[lang];
+  const container = document.getElementById('vkbKeys');
+  const title = document.getElementById('vkbTitle');
+  if (title) title.textContent = layout.title;
+  ['ar','fr','en'].forEach(l => {
+    const btn = document.getElementById('vkbLang' + l.charAt(0).toUpperCase() + l.slice(1));
+    if (btn) btn.style.background = l === lang ? 'rgba(255,255,255,0.3)' : 'transparent';
+  });
+  if (!container) return;
+  container.innerHTML = '';
+  layout.rows.forEach(row => {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'vkb-row';
+    row.forEach(key => {
+      const btn = document.createElement('button');
+      if (key === 'SPACE') { btn.className = 'vkb-key space'; btn.textContent = lang === 'ar' ? 'مسافة' : (lang === 'fr' ? 'Espace' : 'Space'); btn.onclick = () => vkbPress(' '); }
+      else { btn.className = 'vkb-key' + (key === '⌫' ? ' delete' : ''); btn.textContent = key; btn.onclick = () => vkbPress(key); }
+      rowDiv.appendChild(btn);
+    });
+    container.appendChild(rowDiv);
+  });
+}
+function toggleVKB() { document.getElementById('vkbPanel').classList.toggle('open'); }
+function vkbPress(key) {
+  const target = activeInput || document.getElementById('searchInput');
+  if (!target) return;
+  if (key === '⌫') { const s = target.selectionStart; if (s > 0) { target.value = target.value.slice(0,s-1)+target.value.slice(s); target.setSelectionRange(s-1,s-1); } }
+  else { const s = target.selectionStart; target.value = target.value.slice(0,s)+key+target.value.slice(s); target.setSelectionRange(s+key.length,s+key.length); }
+  target.dispatchEvent(new Event('input',{bubbles:true})); target.focus();
+}
+function initDraggableVKB() {
+  const panel = document.getElementById('vkbPanel');
+  const header = document.getElementById('vkbPanelHeader');
+  let dragging=false, startX, startY, origLeft, origBottom;
+  header.addEventListener('mousedown', e => {
+    if (e.target.tagName==='BUTTON') return;
+    dragging=true; startX=e.clientX; startY=e.clientY;
+    const rect=panel.getBoundingClientRect(); origLeft=rect.left; origBottom=window.innerHeight-rect.bottom;
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', ()=>{ dragging=false; document.removeEventListener('mousemove',onMove); });
+  });
+  function onMove(e) { if(!dragging) return; panel.style.left=Math.max(0,origLeft+e.clientX-startX)+'px'; panel.style.bottom=Math.max(0,origBottom-(e.clientY-startY))+'px'; panel.style.right='auto'; panel.style.top='auto'; }
+}
+function doLogout() { if (confirm('هل تريد تسجيل الخروج؟')) { clearSession(); window.location.href = 'index.html'; } }
+init();
+</script>
+</body>
+</html>
